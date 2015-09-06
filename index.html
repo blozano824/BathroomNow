@@ -194,7 +194,7 @@ function getDirect(starting,ending) {
             }
             totDist = Math.round(totDist * 3.28084/5280 * 10)/10;
             totDur = Math.round(totDur/60 * 10)/10;
-            content += "<b>" + ending.ref().parent().key() + ": </b> " + "<br />" + totDist.toString() + " miles away" + "<br /><b><font color='#0f4f90'>Walking:</font></b><br />" + totDur.toString() + " min away"
+            content += "<b><font size='5px'>" + ending.ref().parent().key() + ": </b> " + "<br />" + totDist.toString() + " miles away</font>" + "<br /><b><font size='5px' color='#0f4f90'>Walking:</font></b><br /><font size='5px'>" + totDur.toString() + " minutes away</font>"
             direct.route(request2, function(result, status) {
                 totDur = 0;
                 console.log("ALL GOOD!");
@@ -204,7 +204,7 @@ function getDirect(starting,ending) {
                     totDur += legs[i].duration.value;
                 }
                 totDur = Math.round(totDur/60 * 10)/10;
-                content += "<br /><b><font color='#0f74da'>Driving:</font></b>" + "<br />" + totDur.toString() + " min away"
+                content += "<br /><b><font size='5px' color='#0f74da'>Driving:</font></b>" + "<br /><font size='5px'>" + totDur.toString() + " minutes away" + "<br /><b>Parking:</b><br />" + end.parking + "</font>";
                  infowindow.setContent(content);
                 console.log(ending);
             });
