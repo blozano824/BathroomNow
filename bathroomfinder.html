@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+      html, body { height: 100%; margin-top: 0; padding-top: 0px; }
+      #map {width: 100%; height: 100%; margin-top: 0;}
+    </style>
+  </head>
+    
+  <body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar-header container">
+    <ul class="navbar-title animated fadeIn option"><strong>BathroomNow</strong></ul>
+    </div>
+</nav>
+      
+      
+    <div id="map" class="container"></div>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="custom.css" type="text/css" rel="stylesheet">
+    <link href="animate.css" type="text/css" rel="stylesheet">
+    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+      
+
+    <script type="text/javascript">
+
+
+var mapMarker = new Firebase('https://bathroomnyc.firebaseio.com/');
+var totDist = 0;
+var totDur = 0;
+var infowindow;
+var request;
+        
+function initMap() {
+  var customMapType = new google.maps.StyledMapType([
+      {
+        stylers: [
+          {hue: '#0d64bc'},
+          {visibility: 'simplified'},
+          {gamma: 0.9},
+          {weight: 0.2}
+        ]
+      },
+      {
+        elementType: 'labels',
+        stylers: [{visibility: 'on'}]
+      },
+      {
+        featureType: 'water',
+        stylers: [{color: '#0d64bc'}]
+      }
+    ], {
+      name: 'Custom Style'
+  });
+  var customMapTypeId = 'custom_style';
+    
+  var map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 0, lng: 0},
+    zoom: 14,
+    zoomControl: false,
+    disableDefaultUI: true,
+    zoomControlOptions: {
+        style: google.maps.ZoomControlStyle.DEFAULT,
+        position: google.maps.ControlPosition.LEFT_CENTER
+    },
+  });
+
+    
+  map.mapTypes.set(customMapTypeId, customMapType);
+  map.setMapTypeId(customMapTypeId);
+  directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true, polylineOptions:{strokeColor: '#0f4f90',strokeWeight: (6.5)}});
+  directionsDisplay.setMap(map);
+  directionsDisplay2 = new google.maps.DirectionsRenderer({suppressMarkers: true, polylineOptions:{strokeColor: '#0f74da',strokeWeight: (6.5)}});
+  directionsDisplay2.setMap(map);
+  direct = new google.maps.DirectionsService();
+  // Try HTML5 geolocation.
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var pos = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+
+        
+      var yourlocation = new google.maps.Marker({
+                        map: map,
+                        position: pos,
+                        animation: google.maps.Animation.BOUNCE,
+                        title: 'Your Location',
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 10
+                        },
+      });
+        
+      map.setCenter(pos);
+    }, function() {
+      handleLocationError(true, infoWindow, map.getCenter());
+    });
+  } else {
+    // Browser doesn't support Geolocation
+    handleLocationError(false, infoWindow, map.getCenter());
+  }
+  
+var image = {
+    url: 'BathroomIcon.png',
+    size: new google.maps.Size(25, 40),
+    origin: new google.maps.Point(0, 0),
+    anchor: new google.maps.Point(13, 40)
+};
+    
+mapMarker.orderByValue().once('value',function(snapshot) {
+        console.log(snapshot.val());
+		snapshot.forEach(function(data) {
+            data.forEach(function(bathroom) {
+                var marker = new google.maps.Marker({
+                        map: map,
+                        position: bathroom.val(),
+                        icon: image,
+                        animation: google.maps.Animation.DROP,
+                        title: 'Bathroom'
+                    });
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var posi = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    infowindow = new google.maps.InfoWindow({
+                        content: totDist.toString()
+                    });
+
+                    google.maps.event.addListener(marker, 'click', function() {
+                        getDirect(posi,bathroom);
+                        infowindow.open(map,marker);
+                        });
+                    });
+
+                
+    
+                })
+            })
+        })
+
+}
+
+
+function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+  infoWindow.setPosition(pos);
+  infoWindow.setContent(browserHasGeolocation ?
+                        'Error: The Geolocation service failed.' :
+                        'Error: Your browser doesn\'t support geolocation.');
+}
+        
+
+function getDirect(starting,ending) {
+    
+    var start = starting;
+    var end = ending.val();
+    var content = "";
+    var request = {
+        origin:start,
+        destination:end,
+        travelMode: google.maps.TravelMode.WALKING
+    };
+    var request2 = {
+        origin: start,
+        destination: end,
+        travelMode: google.maps.TravelMode.DRIVING
+    };
+    //console.log(request);
+    if (request==true && request2==true)
+    {
+        console.log("REQUEST");
+    }
+    console.log(JSON.stringify(request)); 
+    direct.route(request, function(result, status) {
+        if (status == google.maps.DirectionsStatus.OK) {
+            /*if (!response.routes[0].copyrights) { 
+                response.routes[0].copyrights = "Copyrights unknown."; 
+                }*/
+            totDist = 0;
+            totDur = 0;
+            console.log("ALL GOOD!");
+            directionsDisplay.setDirections(result);
+            legs = result.routes[0].legs;
+            for(var i=0; i<legs.length; i++) {
+                totDist += legs[i].distance.value;
+                totDur += legs[i].duration.value;
+            }
+            totDist = Math.round(totDist * 3.28084/5280 * 10)/10;
+            totDur = Math.round(totDur/60 * 10)/10;
+            content += "<b>" + ending.ref().parent().key() + ": </b> " + "<br />" + totDist.toString() + " miles away" + "<br /><b><font color='#0f4f90'>Walking:</font></b><br />" + totDur.toString() + " min away"
+            direct.route(request2, function(result, status) {
+                totDur = 0;
+                console.log("ALL GOOD!");
+                directionsDisplay2.setDirections(result);
+                legs = result.routes[0].legs;
+                for(var i=0; i<legs.length; i++) {
+                    totDur += legs[i].duration.value;
+                }
+                totDur = Math.round(totDur/60 * 10)/10;
+                content += "<br /><b><font color='#0f74da'>Driving:</font></b>" + "<br />" + totDur.toString() + " min away"
+                 infowindow.setContent(content);
+                console.log(ending);
+            });
+        }
+        else
+        {
+            console.log("NOT-GOOD!");
+        }
+      });
+}
+        
+        
+    </script>
+    <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCz4T1B7dFeYfetTS1-5EVWKIWzBePz4_U&callback=initMap">
+    </script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+.navbar{
+    background-color: #0f4f90;
+    height: 10%;
+    border: none;
+    -webkit-box-shadow: 0 8px 0 0 rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 8px 0 0 rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 0 0 rgba(0, 0, 0, 0.5);
+}
+
+.navbar-header {
+    float: center;
+    padding: 15px;
+    text-align: center;
+    width: 100%;
+}
+
+.navbar-title {
+    float:none;
+    font-size: 6vh;
+    color: white;
+    font-family:'Montserrat';
+}
+
+.option {
+    -webkit-animation-duration: 2s;
+    -webkit-animation-delay: 1s;
+}
