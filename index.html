@@ -194,7 +194,7 @@ function getDirect(starting,ending) {
             }
             totDist = Math.round(totDist * 3.28084/5280 * 10)/10;
             totDur = Math.round(totDur/60 * 10)/10;
-            content += "<b><font size='5px'>" + ending.ref().parent().key() + ": </b> " + "<br />" + totDist.toString() + " miles away</font>" + "<br /><b><font size='5px' color='#0f4f90'>Walking:</font></b><br /><font size='5px'>" + totDur.toString() + " minutes away</font>"
+            content += "<b> <font size='5px'> <u> <a href='http://maps.apple.com/?daddr=("+end.lat+","+end.lng+")'>" + ending.ref().parent().key() + ":</a> </u> </b> " + "<br />" + totDist.toString() + " miles away</font>" + "<br /><b><font size='5px' color='#0f4f90'>Walking:</font></b><br /><font size='5px'>" + totDur.toString() + " minutes away</font>"
             direct.route(request2, function(result, status) {
                 totDur = 0;
                 console.log("ALL GOOD!");
